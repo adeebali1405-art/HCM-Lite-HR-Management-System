@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HCM Lite - HR Web App BY M.Adeeb Ali Softwer Developer</title>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --primary: #0d9488;
+      --primary-hover: #0f766e;
+      --secondary: #f59e0b;
+      --sidebar-bg: #0f172a;
+      --sidebar-text: #94a3b8;
+      --sidebar-active: #38bdf8;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-mode {
+      --bg-color: #0b0f19;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Layout & Smooth Page Transitions */
+    #app { display: flex; flex: 1; min-height: 100vh; }
+    .sidebar { width: 260px; background-color: var(--sidebar-bg); color: var(--sidebar-text); padding: 25px 20px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+    .sidebar h2 { color: #ffffff; font-size: 1.5rem; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px; }
+    .nav-links { list-style: none; }
+    .nav-links li { margin-bottom: 10px; }
+    .nav-links a { color: var(--sidebar-text); text-decoration: none; padding: 12px 16px; display: block; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.25s ease; }
+    .nav-links a:hover, .nav-links a.active { background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(13, 148, 136, 0.15)); color: var(--sidebar-active); transform: translateX(4px); }
+
+    .main-content { flex: 1; padding: 40px; overflow-y: auto; animation: fadeIn 0.4s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+    .header h1 { font-size: 1.8rem; font-weight: 700; color: var(--text-color); }
+    .header-user { display: flex; align-items: center; gap: 15px; font-weight: 600; background: var(--card-bg); padding: 8px 16px; border-radius: 30px; border: 1px solid var(--border-color); box-shadow: var(--shadow); }
+    
+    /* Cards & Grids */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 30px; }
+    .card { background: var(--card-bg); padding: 25px; border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--border-color); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -10px rgba(0,0,0,0.1); }
+    .card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    .card .value { font-size: 2.2rem; font-weight: 800; color: var(--text-color); }
+
+    /* Forms & Inputs */
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--text-color); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-color); font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
+    .error-msg { color: #ef4444; font-size: 0.8rem; margin-top: 5px; display: none; }
+    
+    /* Buttons */
+    .btn { background-color: var(--primary); color: white; padding: 11px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+    .btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3); }
+    .btn-secondary { background-color: #64748b; }
+    .btn-secondary:hover { background-color: #475569; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3); }
+    .btn-warning { background-color: #f59e0b; color: white; }
+    .btn-warning:hover { background-color: #d97706; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+    .btn-danger { background-color: #ef4444; }
+    .btn-danger:hover { background-color: #dc2626; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+    .btn-sm { padding: 6px 12px; font-size: 0.85rem; width: auto; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; background: var(--card-bg); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
+    th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 0.92rem; }
+    th { background-color: rgba(13, 148, 136, 0.05); font-weight: 700; color: var(--primary); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: rgba(0,0,0,0.01); }
+    
+    /* Status Badges */
+    .badge { padding: 5px 12px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
+    .badge-present { background: #dcfce7; color: #166534; }
+    .badge-late { background: #fef3c7; color: #92400e; }
+    .badge-halfday { background: #ffedd5; color: #9a3412; }
+    .badge-absent { background: #fee2e2; color: #991b1b; }
+    .badge-pending { background: #e0f2fe; color: #075985; }
+    .badge-approved { background: #dcfce7; color: #166534; }
+    .badge-rejected { background: #fee2e2; color: #991b1b; }
+
+    /* Smart Helper AI Widget */
+    .smart-helper { position: fixed; bottom: 25px; right: 25px; width: 340px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; z-index: 1000; animation: bounceIn 0.3s ease; }
+    @keyframes bounceIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .helper-header { background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; padding: 14px 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .helper-body { height: 240px; padding: 15px; overflow-y: auto; font-size: 0.9rem; display: flex; flex-direction: column; gap: 10px; }
+    .chat-msg { padding: 10px 14px; border-radius: 10px; max-width: 85%; line-height: 1.4; }
+    .chat-user { background: #e0e7ff; color: #3730a3; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .chat-ai { background: var(--border-color); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; }
+    .helper-footer { display: flex; padding: 10px; border-top: 1px solid var(--border-color); gap: 8px; background: var(--card-bg); }
+
+    /* Camera Box */
+    #camera-preview { width: 100%; height: 200px; background: #000; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: white; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    #camera-video { width: 100%; height: 100%; object-fit: cover; }
+
+    .auth-wrapper { max-width: 420px; margin: 60px auto; padding: 35px; background: var(--card-bg); border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--border-color); animation: fadeIn 0.4s ease; }
+    .auth-wrapper h2 { text-align: center; margin-bottom: 25px; font-size: 1.8rem; color: var(--primary); }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-box { background: var(--card-bg); width: 90%; max-width: 450px; padding: 30px; border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--border-color); animation: fadeIn 0.3s ease; }
+
+    .hidden { display: none !important; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printable-payslip, #printable-payslip * { visibility: visible; }
+      #printable-payslip { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <div class="sidebar hidden" id="sidebar">
+      <div>
+        <h2>🏢 HCM Lite</h2>
+        <ul class="nav-links" id="nav-menu"></ul>
+      </div>
+      <div>
+        <button class="btn btn-secondary" style="margin-bottom:12px;" onclick="toggleDarkMode()">🌓 Dark / Light Mode</button>
+        <button class="btn btn-danger" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <div class="header hidden" id="main-header">
+        <h1 id="page-title">Dashboard</h1>
+        <div class="header-user">
+          <span id="user-display-name">Loading...</span>
+        </div>
+      </div>
+      <div id="view-container"></div>
+    </div>
+  </div>
+
+  <!-- Smart Helper AI Chat Box -->
+  <div class="smart-helper hidden" id="smart-helper-box">
+    <div class="helper-header">
+      <span>🤖 Smart Helper (AI)</span>
+      <span style="cursor:pointer; font-size: 1.2rem;" onclick="toggleHelper()">_</span>
+    </div>
+    <div class="helper-body" id="helper-messages">
+      <div class="chat-msg chat-ai">Hi! Ask me questions about company stats, leaves, or attendance.</div>
+    </div>
+    <div class="helper-footer">
+      <input type="text" id="helper-input" placeholder="Type question..." style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px; background:var(--card-bg); color:var(--text-color);" onkeypress="if(event.key==='Enter') sendHelperMessage()">
+      <button class="btn btn-sm" onclick="sendHelperMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- Edit Employee Modal -->
+  <div class="modal-overlay hidden" id="edit-emp-modal">
+    <div class="modal-box">
+      <h3 style="margin-bottom:15px; color:var(--primary);">Edit Employee Details</h3>
+      <form onsubmit="handleSaveEditEmployee(event)">
+        <input type="hidden" id="edit-emp-id">
+        <div class="form-group"><label>Name</label><input type="text" id="edit-emp-name" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="edit-emp-email" required></div>
+        <div class="form-group"><label>Department</label><input type="text" id="edit-emp-dept" required></div>
+        <div class="form-group"><label>Monthly Salary ($)</label><input type="number" id="edit-emp-salary" required min="1"></div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button class="btn" type="submit">Save Changes</button>
+          <button class="btn btn-secondary" type="button" onclick="closeEditModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const KEYS = {
+      COMPANY: 'hcm_company',
+      USERS: 'hcm_users',
+      ATTENDANCE: 'hcm_attendance',
+      LEAVES: 'hcm_leaves',
+      SESSION: 'hcm_session',
+      ANNOUNCEMENTS: 'hcm_announcements'
+    };
+
+    function getData(key) { return JSON.parse(localStorage.getItem(key)) || (key === KEYS.COMPANY ? null : []); }
+    function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+    (function initData() {
+      if (!localStorage.getItem(KEYS.ANNOUNCEMENTS)) {
+        setData(KEYS.ANNOUNCEMENTS, [{ id: 1, text: "Welcome to HCM Lite HR Web Portal!", date: new Date().toISOString().split('T')[0] }]);
+      }
+    })();
+
+    function getCurrentUser() { return JSON.parse(localStorage.getItem(KEYS.SESSION)); }
+
+    let currentPage = 'index';
+    let authSubView = 'login'; 
+
+    function navigateTo(page) {
+      const user = getCurrentUser();
+      const company = getData(KEYS.COMPANY);
+
+      if (!company && page !== 'index') page = 'index';
+      if (!user && page !== 'index') page = 'index';
+
+      if (user && user.role === 'employee') {
+        if (['admin', 'employees', 'settings'].includes(page)) page = 'employee';
+      }
+
+      currentPage = page;
+      renderApp();
+    }
+
+    function renderApp() {
+      const user = getCurrentUser();
+      const company = getData(KEYS.COMPANY);
+      const sidebar = document.getElementById('sidebar');
+      const header = document.getElementById('main-header');
+      const helperBox = document.getElementById('smart-helper-box');
+
+      if (!company || !user) {
+        sidebar.classList.add('hidden');
+        header.classList.add('hidden');
+        helperBox.classList.add('hidden');
+        renderIndexPage();
+        return;
+      }
+
+      sidebar.classList.remove('hidden');
+      header.classList.remove('hidden');
+      helperBox.classList.remove('hidden');
+      document.getElementById('user-display-name').innerText = `${user.name} (${user.role.toUpperCase()})`;
+
+      renderSidebarLinks(user.role);
+
+      switch (currentPage) {
+        case 'admin': renderAdminDashboard(); break;
+        case 'employees': renderManageEmployees(); break;
+        case 'leaves': renderLeaveRequests(); break;
+        case 'settings': renderCompanySettings(); break;
+        case 'employee': renderEmployeeDashboard(); break;
+        case 'payslip': renderPayslipView(); break;
+        default: renderEmployeeDashboard(); break;
+      }
+    }
+
+    function renderSidebarLinks(role) {
+      const menu = document.getElementById('nav-menu');
+      menu.innerHTML = '';
+      let links = role === 'admin' ? [
+        { page: 'admin', label: '📊 Dashboard' },
+        { page: 'employees', label: '👥 Employees' },
+        { page: 'leaves', label: '📝 Leave Requests' },
+        { page: 'settings', label: '⚙️ Settings' },
+        { page: 'payslip', label: '💵 Payslips' }
+      ] : [
+        { page: 'employee', label: '🏠 My Dashboard' },
+        { page: 'payslip', label: '💵 My Payslip' }
+      ];
+
+      links.forEach(l => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a class="${currentPage === l.page ? 'active' : ''}" onclick="navigateTo('${l.page}')">${l.label}</a>`;
+        menu.appendChild(li);
+      });
+    }
+
+    // --- AUTH & SETUP ---
+    function renderIndexPage() {
+      const company = getData(KEYS.COMPANY);
+      const container = document.getElementById('view-container');
+      
+      if (!company) {
+        container.innerHTML = `
+          <div class="auth-wrapper">
+            <h2>Initial Setup</h2>
+            <form onsubmit="handleInitialSetup(event)">
+              <div class="form-group"><label>Company Name</label><input type="text" id="setup-cname" required></div>
+              <div class="form-group"><label>Office Start Time</label><input type="time" id="setup-start" value="09:00" required></div>
+              <div class="form-group"><label>Grace Minutes</label><input type="number" id="setup-grace" value="15" required></div>
+              <div class="form-group"><label>Yearly Leave Quota</label><input type="number" id="setup-quota" value="20" required></div>
+              <hr style="margin:20px 0; border:0; border-top:1px solid var(--border-color);">
+              <h3 style="margin-bottom:15px; color:var(--text-color); font-size:1.1rem;">Admin Account</h3>
+              <div class="form-group"><label>Admin Name</label><input type="text" id="setup-aname" required></div>
+              <div class="form-group"><label>Admin Email</label><input type="email" id="setup-aemail" required></div>
+              <div class="form-group"><label>Password</label><input type="password" id="setup-apass" required></div>
+              <button class="btn" type="submit">Complete Setup</button>
+            </form>
+          </div>
+        `;
+      } else {
+        if (authSubView === 'login') {
+          container.innerHTML = `
+            <div class="auth-wrapper">
+              <h2>HCM Lite Login</h2>
+              <form onsubmit="handleLogin(event)">
+                <div class="form-group"><label>Email Address</label><input type="email" id="login-email" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="login-pass" required></div>
+                <button class="btn" type="submit" style="margin-bottom:15px;">Login to Portal</button>
+                <div style="text-align: center;">
+                  <a href="#" onclick="authSubView='forgot'; renderIndexPage();" style="color:var(--primary); text-decoration:none; font-size:0.9rem; font-weight:600;">🔑 Forgot Password?</a>
+                </div>
+              </form>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="auth-wrapper">
+              <h2>Reset Password</h2>
+              <form onsubmit="handleForgotPassword(event)">
+                <div class="form-group"><label>Registered Email</label><input type="email" id="forgot-email" required placeholder="Enter your email..."></div>
+                <div class="form-group"><label>New Password</label><input type="password" id="forgot-newpass" required placeholder="Enter new password..."></div>
+                <button class="btn" type="submit" style="margin-bottom:15px;">Update Password</button>
+                <div style="text-align: center;">
+                  <a href="#" onclick="authSubView='login'; renderIndexPage();" style="color:var(--text-muted); text-decoration:none; font-size:0.9rem;">← Back to Login</a>
+                </div>
+              </form>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function handleInitialSetup(e) {
+      e.preventDefault();
+      const comp = {
+        name: document.getElementById('setup-cname').value,
+        startTime: document.getElementById('setup-start').value,
+        graceMinutes: parseInt(document.getElementById('setup-grace').value),
+        leaveQuota: parseInt(document.getElementById('setup-quota').value)
+      };
+      const admin = {
+        id: Date.now(),
+        name: document.getElementById('setup-aname').value,
+        email: document.getElementById('setup-aemail').value,
+        password: document.getElementById('setup-apass').value,
+        role: 'admin',
+        department: 'Management',
+        salary: 120000
+      };
+
+      setData(KEYS.COMPANY, comp);
+      setData(KEYS.USERS, [admin]);
+      setData(KEYS.SESSION, admin);
+      navigateTo('admin');
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-pass').value;
+      const users = getData(KEYS.USERS);
+
+      const user = users.find(u => u.email === email && u.password === pass);
+      if (user) {
+        setData(KEYS.SESSION, user);
+        navigateTo(user.role === 'admin' ? 'admin' : 'employee');
+      } else {
+        alert("Invalid email or password!");
+      }
+    }
+
+    function handleForgotPassword(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value;
+      const newPass = document.getElementById('forgot-newpass').value;
+      let users = getData(KEYS.USERS);
+
+      const userIndex = users.findIndex(u => u.email === email);
+      if (userIndex !== -1) {
+        users[userIndex].password = newPass;
+        setData(KEYS.USERS, users);
+        alert("Password updated successfully! Please login with your new password.");
+        authSubView = 'login';
+        renderIndexPage();
+      } else {
+        alert("Email address not found in system database!");
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem(KEYS.SESSION);
+      authSubView = 'login';
+      navigateTo('index');
+    }
+
+    // --- ADMIN DASHBOARD ---
+    function renderAdminDashboard() {
+      document.getElementById('page-title').innerText = 'Admin Dashboard';
+      const users = getData(KEYS.USERS).filter(u => u.role === 'employee');
+      const leaves = getData(KEYS.LEAVES);
+      const att = getData(KEYS.ATTENDANCE);
+      const today = new Date().toISOString().split('T')[0];
+
+      const todayAtt = att.filter(a => a.date === today);
+      const presentCount = todayAtt.filter(a => a.status === 'present').length;
+      const lateCount = todayAtt.filter(a => a.status === 'late').length;
+      const onLeaveCount = leaves.filter(l => l.status === 'approved' && l.from <= today && l.to >= today).length;
+      const announcements = getData(KEYS.ANNOUNCEMENTS);
+
+      document.getElementById('view-container').innerHTML = `
+        <div class="grid">
+          <div class="card"><h3>Total Employees</h3><div class="value">${users.length}</div></div>
+          <div class="card"><h3>Present Today</h3><div class="value" style="color:#166534;">${presentCount}</div></div>
+          <div class="card"><h3>Late Today</h3><div class="value" style="color:#92400e;">${lateCount}</div></div>
+          <div class="card"><h3>On Leave Today</h3><div class="value" style="color:#075985;">${onLeaveCount}</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom: 25px;">
+          <h3>Post Company Announcement</h3>
+          <div style="display:flex; gap:12px; margin-top:12px;">
+            <input type="text" id="ann-text" placeholder="Write announcement update..." style="flex:1;">
+            <button class="btn" style="width:auto; padding: 0 25px;" onclick="postAnnouncement()">Post</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Recent Announcements</h3>
+          <ul style="margin-top:12px; padding-left:20px; line-height: 1.6;">
+            ${announcements.map(a => `<li><strong>[${a.date}]</strong> ${a.text}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    function postAnnouncement() {
+      const txt = document.getElementById('ann-text').value;
+      if (!txt) return;
+      const anns = getData(KEYS.ANNOUNCEMENTS);
+      anns.unshift({ id: Date.now(), text: txt, date: new Date().toISOString().split('T')[0] });
+      setData(KEYS.ANNOUNCEMENTS, anns);
+      renderAdminDashboard();
+    }
+
+    // --- MANAGE EMPLOYEES (WITH EDIT BUTTON) ---
+    function renderManageEmployees() {
+      document.getElementById('page-title').innerText = 'Manage Employees';
+      const users = getData(KEYS.USERS).filter(u => u.role === 'employee');
+
+      document.getElementById('view-container').innerHTML = `
+        <div class="card" style="margin-bottom:25px;">
+          <h3>Add New Employee</h3>
+          <form onsubmit="handleAddEmployee(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-top:15px;">
+            <div><label>Name</label><input type="text" id="emp-name" required></div>
+            <div><label>Email</label><input type="email" id="emp-email" required><span class="error-msg" id="emp-email-err">Email already exists</span></div>
+            <div><label>Password</label><input type="password" id="emp-pass" required></div>
+            <div><label>Department</label><input type="text" id="emp-dept" required></div>
+            <div><label>Monthly Salary ($)</label><input type="number" id="emp-salary" required min="1"></div>
+            <div style="grid-column: 1/-1; display:flex; justify-content: flex-end;"><button class="btn" style="width:auto; padding: 12px 30px;" type="submit">Create Account</button></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap:10px;">
+            <h3>Employee Directory</h3>
+            <input type="text" id="emp-search" placeholder="Search by name or department..." oninput="filterEmployees()" style="width:260px;">
+          </div>
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Department</th><th>Salary</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="emp-table-body">
+              ${renderEmployeeRows(users)}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderEmployeeRows(list) {
+      if (list.length === 0) return `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No employees found.</td></tr>`;
+      return list.map(u => `
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}</td>
+          <td>${u.department}</td>
+          <td>$${u.salary.toLocaleString()}</td>
+          <td>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-warning btn-sm" onclick="openEditModal(${u.id})">✏️ Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${u.id})">🗑️ Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function handleAddEmployee(e) {
+      e.preventDefault();
+      const email = document.getElementById('emp-email').value;
+      const users = getData(KEYS.USERS);
+
+      if (users.some(u => u.email === email)) {
+        document.getElementById('emp-email-err').style.display = 'block';
+        return;
+      }
+
+      const newEmp = {
+        id: Date.now(),
+        name: document.getElementById('emp-name').value,
+        email: email,
+        password: document.getElementById('emp-pass').value,
+        department: document.getElementById('emp-dept').value,
+        salary: parseFloat(document.getElementById('emp-salary').value),
+        role: 'employee'
+      };
+
+      users.push(newEmp);
+      setData(KEYS.USERS, users);
+      renderManageEmployees();
+    }
+
+    function openEditModal(id) {
+      const users = getData(KEYS.USERS);
+      const emp = users.find(u => u.id === id);
+      if (emp) {
+        document.getElementById('edit-emp-id').value = emp.id;
+        document.getElementById('edit-emp-name').value = emp.name;
+        document.getElementById('edit-emp-email').value = emp.email;
+        document.getElementById('edit-emp-dept').value = emp.department;
+        document.getElementById('edit-emp-salary').value = emp.salary;
+        document.getElementById('edit-emp-modal').classList.remove('hidden');
+      }
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-emp-modal').classList.add('hidden');
+    }
+
+    function handleSaveEditEmployee(e) {
+      e.preventDefault();
+      const id = parseInt(document.getElementById('edit-emp-id').value);
+      let users = getData(KEYS.USERS);
+
+      const index = users.findIndex(u => u.id === id);
+      if (index !== -1) {
+        users[index].name = document.getElementById('edit-emp-name').value;
+        users[index].email = document.getElementById('edit-emp-email').value;
+        users[index].department = document.getElementById('edit-emp-dept').value;
+        users[index].salary = parseFloat(document.getElementById('edit-emp-salary').value);
+        setData(KEYS.USERS, users);
+        closeEditModal();
+        renderManageEmployees();
+        alert("Employee updated successfully!");
+      }
+    }
+
+    function deleteEmployee(id) {
+      if (!confirm("Are you sure you want to delete this employee?")) return;
+      let users = getData(KEYS.USERS);
+      users = users.filter(u => u.id !== id);
+      setData(KEYS.USERS, users);
+      renderManageEmployees();
+    }
+
+    function filterEmployees() {
+      const q = document.getElementById('emp-search').value.toLowerCase();
+      const users = getData(KEYS.USERS).filter(u => u.role === 'employee' && (u.name.toLowerCase().includes(q) || u.department.toLowerCase().includes(q)));
+      document.getElementById('emp-table-body').innerHTML = renderEmployeeRows(users);
+    }
+
+    // --- LEAVE REQUESTS ---
+    function renderLeaveRequests() {
+      document.getElementById('page-title').innerText = 'Leave Requests (Admin)';
+      const leaves = getData(KEYS.LEAVES);
+      const users = getData(KEYS.USERS);
+
+      document.getElementById('view-container').innerHTML = `
+        <div class="card">
+          <h3>Employee Leave Applications</h3>
+          <table>
+            <thead>
+              <tr><th>Employee</th><th>Dates</th><th>Days</th><th>Reason</th><th>Status</th><th>Comment</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              ${leaves.length === 0 ? '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No leave applications available.</td></tr>' : leaves.map(l => {
+                const emp = users.find(u => u.id === l.empId) || { name: 'Unknown' };
+                return `
+                  <tr>
+                    <td><strong>${emp.name}</strong></td>
+                    <td>${l.from} to ${l.to}</td>
+                    <td>${l.days} days</td>
+                    <td>${l.reason}</td>
+                    <td><span class="badge badge-${l.status}">${l.status}</span></td>
+                    <td>${l.comment || '-'}</td>
+                    <td>
+                      ${l.status === 'pending' ? `
+                        <div style="display:flex; gap:6px;">
+                          <button class="btn btn-sm" onclick="processLeave(${l.id}, 'approved')">Approve</button>
+                          <button class="btn btn-danger btn-sm" onclick="processLeave(${l.id}, 'rejected')">Reject</button>
+                        </div>
+                      ` : '<span style="color:var(--text-muted); font-size:0.85rem;">Processed</span>'}
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function processLeave(leaveId, status) {
+      const comment = prompt("Add an optional response comment:");
+      const leaves = getData(KEYS.LEAVES);
+      const index = leaves.findIndex(l => l.id === leaveId);
+      if (index !== -1) {
+        leaves[index].status = status;
+        leaves[index].comment = comment || '';
+        setData(KEYS.LEAVES, leaves);
+        renderLeaveRequests();
+      }
+    }
+
+    // --- COMPANY SETTINGS ---
+    function renderCompanySettings() {
+      document.getElementById('page-title').innerText = 'Company Settings';
+      const comp = getData(KEYS.COMPANY);
+
+      document.getElementById('view-container').innerHTML = `
+        <div class="card" style="max-width:550px;">
+          <form onsubmit="saveCompanySettings(event)">
+            <div class="form-group"><label>Company Name</label><input type="text" id="set-cname" value="${comp.name}" required></div>
+            <div class="form-group"><label>Office Start Time</label><input type="time" id="set-start" value="${comp.startTime}" required></div>
+            <div class="form-group"><label>Grace Minutes</label><input type="number" id="set-grace" value="${comp.graceMinutes}" required></div>
+            <div class="form-group"><label>Yearly Leave Quota</label><input type="number" id="set-quota" value="${comp.leaveQuota}" required></div>
+            <button class="btn" type="submit" style="margin-top:10px;">Save Configuration</button>
+          </form>
+        </div>
+      `;
+    }
+
+    function saveCompanySettings(e) {
+      e.preventDefault();
+      const comp = {
+        name: document.getElementById('set-cname').value,
+        startTime: document.getElementById('set-start').value,
+        graceMinutes: parseInt(document.getElementById('set-grace').value),
+        leaveQuota: parseInt(document.getElementById('set-quota').value)
+      };
+      setData(KEYS.COMPANY, comp);
+      alert("Company Settings Updated Successfully!");
+    }
+
+    // --- EMPLOYEE DASHBOARD ---
+    function renderEmployeeDashboard() {
+      document.getElementById('page-title').innerText = 'Employee Dashboard';
+      const user = getCurrentUser();
+      const company = getData(KEYS.COMPANY);
+      const att = getData(KEYS.ATTENDANCE);
+      const leaves = getData(KEYS.LEAVES).filter(l => l.empId === user.id);
+      const today = new Date().toISOString().split('T')[0];
+
+      const todayRecord = att.find(a => a.empId === user.id && a.date === today);
+      const approvedDays = leaves.filter(l => l.status === 'approved').reduce((sum, l) => sum + l.days, 0);
+      const remainingQuota = company.leaveQuota - approvedDays;
+
+      document.getElementById('view-container').innerHTML = `
+        <div class="grid">
+          <div class="card"><h3>Leave Balance Remaining</h3><div class="value">${remainingQuota} / ${company.leaveQuota} Days</div></div>
+          <div class="card"><h3>Today's Attendance Status</h3><div class="value" style="font-size:1.3rem; margin-top:5px;"><span class="badge badge-${todayRecord ? todayRecord.status : 'pending'}">${todayRecord ? todayRecord.status.toUpperCase() : 'NOT CHECKED IN'}</span></div></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
+          <!-- Camera Check-In Card -->
+          <div class="card">
+            <h3>Attendance Check-In / Check-Out</h3>
+            <div id="camera-preview">
+              <span id="cam-status" style="font-weight:600;">Camera Standby...</span>
+              <video id="camera-video" class="hidden" autoplay muted></video>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <button class="btn" onclick="openCameraAndCheckIn()" ${todayRecord ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Check In</button>
+              <button class="btn btn-secondary" onclick="checkOut()" ${!todayRecord || todayRecord.checkOut ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Check Out</button>
+            </div>
+          </div>
+
+          <!-- Apply Leave Card -->
+          <div class="card">
+            <h3>Apply for Leave</h3>
+            <form onsubmit="handleApplyLeave(event)">
+              <div class="form-group"><label>From Date</label><input type="date" id="leave-from" required></div>
+              <div class="form-group"><label>To Date</label><input type="date" id="leave-to" required></div>
+              <div class="form-group"><label>Reason</label><textarea id="leave-reason" rows="2" required></textarea></div>
+              <button class="btn" type="submit">Submit Leave Request</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Attendance History -->
+        <div class="card" style="margin-top:25px;">
+          <h3>My Attendance Log</h3>
+          <table>
+            <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead>
+            <tbody>
+              ${att.filter(a => a.empId === user.id).length === 0 ? '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No attendance records recorded yet.</td></tr>' : att.filter(a => a.empId === user.id).map(a => `
+                <tr><td>${a.date}</td><td>${a.checkIn}</td><td>${a.checkOut || '-'}</td><td><span class="badge badge-${a.status}">${a.status}</span></td></tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function openCameraAndCheckIn() {
+      const camStatus = document.getElementById('cam-status');
+      const video = document.getElementById('camera-video');
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            video.srcObject = stream;
+            video.classList.remove('hidden');
+            camStatus.classList.add('hidden');
+            setTimeout(() => {
+              stream.getTracks().forEach(track => track.stop());
+              performCheckIn();
+            }, 2000);
+          })
+          .catch(() => {
+            alert("Camera access unavailable. Proceeding with instant check-in.");
+            performCheckIn();
+          });
+      } else {
+        performCheckIn();
+      }
+    }
+
+    function performCheckIn() {
+      const user = getCurrentUser();
+      const comp = getData(KEYS.COMPANY);
+      const att = getData(KEYS.ATTENDANCE);
+      const today = new Date().toISOString().split('T')[0];
+
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      const [startH, startM] = comp.startTime.split(':').map(Number);
+      const graceTime = new Date();
+      graceTime.setHours(startH, startM + comp.graceMinutes, 0);
+
+      let status = 'present';
+      if (now > graceTime) status = 'late';
+
+      att.push({
+        id: Date.now(),
+        empId: user.id,
+        date: today,
+        checkIn: timeStr,
+        checkOut: null,
+        status: status,
+        workHours: 0
+      });
+
+      setData(KEYS.ATTENDANCE, att);
+      alert(`Checked in successfully at ${timeStr}. Status: ${status.toUpperCase()}`);
+      renderEmployeeDashboard();
+    }
+
+    function checkOut() {
+      const user = getCurrentUser();
+      const att = getData(KEYS.ATTENDANCE);
+      const today = new Date().toISOString().split('T')[0];
+      const record = att.find(a => a.empId === user.id && a.date === today);
+
+      if (record) {
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+        record.checkOut = timeStr;
+
+        const [inH, inM] = record.checkIn.split(':').map(Number);
+        const hoursWorked = (now.getHours() + now.getMinutes() / 60) - (inH + inM / 60);
+        record.workHours = hoursWorked;
+
+        if (hoursWorked < 5) {
+          record.status = 'halfday';
+        }
+
+        setData(KEYS.ATTENDANCE, att);
+        alert(`Checked out at ${timeStr}. Hours worked: ${hoursWorked.toFixed(1)} hrs`);
+        renderEmployeeDashboard();
+      }
+    }
+
+    function handleApplyLeave(e) {
+      e.preventDefault();
+      const user = getCurrentUser();
+      const comp = getData(KEYS.COMPANY);
+      const leaves = getData(KEYS.LEAVES);
+
+      const fromDate = new Date(document.getElementById('leave-from').value);
+      const toDate = new Date(document.getElementById('leave-to').value);
+
+      if (fromDate > toDate) {
+        alert("From date must be earlier than or equal to To date!");
+        return;
+      }
+
+      let days = 0;
+      let cur = new Date(fromDate);
+      while (cur <= toDate) {
+        const day = cur.getDay();
+        if (day !== 0 && day !== 6) days++; // Skip weekends
+        cur.setDate(cur.getDate() + 1);
+      }
+
+      if (days === 0) {
+        alert("Selected range contains no working days (weekends excluded)!");
+        return;
+      }
+
+      const approvedDays = leaves.filter(l => l.empId === user.id && l.status === 'approved').reduce((s, l) => s + l.days, 0);
+      if (approvedDays + days > comp.leaveQuota) {
+        alert("Requested leave days exceed your yearly quota!");
+        return;
+      }
+
+      leaves.push({
+        id: Date.now(),
+        empId: user.id,
+        from: document.getElementById('leave-from').value,
+        to: document.getElementById('leave-to').value,
+        days: days,
+        reason: document.getElementById('leave-reason').value,
+        status: 'pending',
+        comment: ''
+      });
+
+      setData(KEYS.LEAVES, leaves);
+      alert("Leave request submitted successfully!");
+      renderEmployeeDashboard();
+    }
+
+    // --- PAYSLIP VIEW ---
+    function renderPayslipView() {
+      document.getElementById('page-title').innerText = 'Monthly Salary Payslip';
+      const user = getCurrentUser();
+      const users = getData(KEYS.USERS).filter(u => u.role === 'employee');
+      const container = document.getElementById('view-container');
+
+      if (user.role === 'admin') {
+        container.innerHTML = `
+          <div class="card" style="max-width:420px; margin-bottom:25px;">
+            <label style="font-weight:600; margin-bottom:8px; display:block;">Select Employee:</label>
+            <select id="payslip-emp-select" onchange="generatePayslipForSelected()">
+              <option value="">-- Choose Employee --</option>
+              ${users.map(u => `<option value="${u.id}">${u.name} (${u.department})</option>`).join('')}
+            </select>
+          </div>
+          <div id="payslip-render-area"></div>
+        `;
+      } else {
+        container.innerHTML = `<div id="payslip-render-area">${getPayslipHTML(user.id)}</div>`;
+      }
+    }
+
+    function generatePayslipForSelected() {
+      const empId = parseInt(document.getElementById('payslip-emp-select').value);
+      const area = document.getElementById('payslip-render-area');
+      if (empId) area.innerHTML = getPayslipHTML(empId);
+      else area.innerHTML = '';
+    }
+
+    function getPayslipHTML(empId) {
+      const emp = getData(KEYS.USERS).find(u => u.id === empId);
+      const company = getData(KEYS.COMPANY);
+      const att = getData(KEYS.ATTENDANCE).filter(a => a.empId === empId);
+
+      const workingDaysInMonth = 22;
+      const perDayRate = emp.salary / workingDaysInMonth;
+      const absentCount = att.filter(a => a.status === 'absent').length;
+      const halfDayCount = att.filter(a => a.status === 'halfday').length;
+
+      const totalDeductions = perDayRate * (absentCount + (0.5 * halfDayCount));
+      const netSalary = Math.max(0, emp.salary - totalDeductions);
+
+      return `
+        <div class="card" id="printable-payslip" style="max-width:650px; margin:auto;">
+          <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--border-color); padding-bottom:15px; margin-bottom:20px;">
+            <div>
+              <h2 style="color:var(--primary);">${company.name}</h2>
+              <p style="color:var(--text-muted); font-size:0.9rem;">Official Salary Statement</p>
+            </div>
+            <div style="text-align:right;">
+              <h3>Payslip</h3>
+              <p style="color:var(--text-muted); font-size:0.9rem;">${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</p>
+            </div>
+          </div>
+          <div style="margin-bottom:20px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <p><strong>Employee Name:</strong> ${emp.name}</p>
+            <p><strong>Department:</strong> ${emp.department}</p>
+            <p><strong>Base Salary:</strong> $${emp.salary.toLocaleString()}</p>
+            <p><strong>Per Day Rate:</strong> $${perDayRate.toFixed(2)}</p>
+          </div>
+          <table>
+            <tr><th>Description</th><th>Calculation / Count</th><th>Amount</th></tr>
+            <tr><td>Base Salary</td><td>Standard Monthly</td><td>$${emp.salary.toFixed(2)}</td></tr>
+            <tr><td>Absences</td><td>${absentCount} day(s)</td><td>-$${(perDayRate * absentCount).toFixed(2)}</td></tr>
+            <tr><td>Half-Days</td><td>${halfDayCount} day(s)</td><td>-$${(perDayRate * 0.5 * halfDayCount).toFixed(2)}</td></tr>
+            <tr style="font-weight:bold; background:rgba(13, 148, 136, 0.08);">
+              <td colspan="2">Net Payable Salary</td>
+              <td style="color:var(--primary); font-size:1.1rem;">$${netSalary.toFixed(2)}</td>
+            </tr>
+          </table>
+          <button class="btn" style="margin-top:25px;" onclick="window.print()">🖨️ Print / Save as PDF</button>
+        </div>
+      `;
+    }
+
+    // --- SMART HELPER AI CHAT ---
+    function toggleHelper() {
+      const body = document.getElementById('helper-messages');
+      const footer = document.querySelector('.helper-footer');
+      body.classList.toggle('hidden');
+      footer.classList.toggle('hidden');
+    }
+
+    function sendHelperMessage() {
+      const input = document.getElementById('helper-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendChatMessage(text, 'user');
+      input.value = '';
+
+      setTimeout(() => {
+        const reply = computeAIReply(text);
+        appendChatMessage(reply, 'ai');
+      }, 300);
+    }
+
+    function appendChatMessage(msg, sender) {
+      const body = document.getElementById('helper-messages');
+      const div = document.createElement('div');
+      div.className = `chat-msg chat-${sender}`;
+      div.innerText = msg;
+      body.appendChild(div);
+      body.scrollTop = body.scrollHeight;
+    }
+
+    function computeAIReply(q) {
+      const text = q.toLowerCase();
+      const user = getCurrentUser();
+      const users = getData(KEYS.USERS);
+      const leaves = getData(KEYS.LEAVES);
+      const att = getData(KEYS.ATTENDANCE);
+      const comp = getData(KEYS.COMPANY);
+
+      if (user.role === 'admin') {
+        if (text.includes('employees') || text.includes('how many')) {
+          return `There are currently ${users.filter(u => u.role === 'employee').length} registered employees.`;
+        }
+        if (text.includes('leave')) {
+          const pending = leaves.filter(l => l.status === 'pending').length;
+          return `There are ${pending} pending leave applications waiting for review.`;
+        }
+        if (text.includes('late')) {
+          const today = new Date().toISOString().split('T')[0];
+          const lateCount = att.filter(a => a.date === today && a.status === 'late').length;
+          return `Today, ${lateCount} employee(s) arrived late.`;
+        }
+      } else {
+        if (text.includes('leave')) {
+          const approved = leaves.filter(l => l.empId === user.id && l.status === 'approved').reduce((s, l) => s + l.days, 0);
+          return `You have ${comp.leaveQuota - approved} leave day(s) remaining out of your ${comp.leaveQuota} quota.`;
+        }
+        if (text.includes('late') || text.includes('hours')) {
+          const myAtt = att.filter(a => a.empId === user.id);
+          const lates = myAtt.filter(a => a.status === 'late').length;
+          return `You have been marked late ${lates} time(s) this month.`;
+        }
+      }
+      return "I can answer questions regarding employee counts, leave balances, and attendance status from your active database records!";
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    navigateTo('index');
+  </script>
+</body>
+</html>
